@@ -39,4 +39,10 @@ log-monitor --name daily --pattern "ERRORSUM: 0000" --glob "/var/log/mysql_backu
             -n weekly  -p "ERRORSUM:\s+0000" -g "/var/log/mysql_backup/*weekly" -a 1w
             -n monthly -p "ERRORSUM:\s+0000" -g "/var/log/mysql_backup/*monthly" -a 1m
 
+Exits:
+0:  All log files OK
+2:  One or more log files is critical
+4:  Program error; invocation or run-time
+
+Set 'DEBUG' environment variable to '1' to get more useful input to STDERR.
 

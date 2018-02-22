@@ -45,10 +45,6 @@ for (my $i = 0; $i <= @names; $i++){
 	debug("Pattern: $pattern");
 	debug("Max age: $max_age");
 
-
-
-#$pattern = qr/$pattern/;
-
 	my @logfiles = glob($glob);
 
 	my %ages;
@@ -117,7 +113,7 @@ sub debug{
 	return unless $ENV{DEBUG};
 	my $message = shift;
 	chomp($message);
-	print "DEBUG: $message\n";
+	print STDERR "DEBUG: $message\n";
 }
 
 sub abort{
@@ -176,6 +172,8 @@ Exits:
 0:  All log files OK
 2:  One or more log files is critical
 4:  Program error; invocation or run-time
+
+Set 'DEBUG' environment variable to '1' to get more useful input to STDERR.
 
 EOF
 exit 4;
