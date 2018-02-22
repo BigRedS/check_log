@@ -17,7 +17,7 @@ GetOptions(
 	"name|n=s" => \@names,
 	"max-age|a=s" => \@max_ages,
 	"help|h" => \$help,
-) or die ("Failed to parse command-line arguments");
+) or abort ("Failed to parse command-line arguments");
 
 usage() if $help;
 
@@ -70,7 +70,7 @@ for (my $i = 0; $i <= @names; $i++){
 	debug("File new enough");
 
 
-	open(my $fh, "<", $file) or die ("Failed to open file '$file' :$!");
+	open(my $fh, "<", $file) or abort ("Failed to open log file '$name' : '$file' :$!");
 	my $lastline;
 	while(my $line = readline($fh)){
 		$lastline = $line if $line =~ m/\S+/;
@@ -103,7 +103,7 @@ exit 2;
 sub max_age{
 	my $age = shift;
 	return $age if $age =~ m/^\d+$/;
-	die ("Invalid age: '$age'") unless $age =~ m/(\d+)(\w)/;
+	abort ("Invalid age: '$age'") unless $age =~ m/(\d+)(\w)/;
 	my ($number,$letter) = ($1,$2);
 	lc($letter);
 	return $number * 60 if $letter eq 'm';
@@ -172,6 +172,10 @@ log-monitor --name daily --pattern "ERRORSUM: 0000" --glob "/var/log/mysql_backu
             -n weekly  -p "ERRORSUM:\s+0000" -g "/var/log/mysql_backup/*weekly" -a 1w
             -n monthly -p "ERRORSUM:\s+0000" -g "/var/log/mysql_backup/*monthly" -a 1m
 
+Exits:
+0:  All log files OK
+2:  One or more log files is critical
+4:  Program error; invocation or run-time
 
 EOF
 exit 4;
