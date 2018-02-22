@@ -27,6 +27,8 @@ unless((     scalar(@names) == scalar(@patterns))
 	){
 	abort("Unbalanced arguments");
 }
+
+my $now = time();
 my @good;
 my @bad;
 for (my $i = 0; $i <= @names; $i++){
@@ -60,7 +62,8 @@ for (my $i = 0; $i <= @names; $i++){
 
 	debug("Newest file: '$file' : ".localtime($newest_mtime)." ($newest_mtime)");
 
-	if($newest_mtime < $max_age){
+	my $age = $now = $newest_mtime;
+	if($age > $max_age){
 		push(@bad, [$name, "File $file too old"]);
 		next;
 	}
