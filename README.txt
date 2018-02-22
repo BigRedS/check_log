@@ -16,8 +16,8 @@ four switches. Every log file *must* have all four.
 
     A glob to use to list the possible log files. 
 
-  --max-age [<integer> | <integer>h | <integer>d | <integer> w]
-  --a [<integer> | <integer>h | <integer>d | <integer> w]
+  --max-age [<seconds> | <hours>h | <days>d | <weeks>w]
+  --a [<seconds> | <hours>h | <days>d | <weeks>w]
 
     Maximum age for the log file, in seconds, hours, days or weeks, respectively
 
@@ -27,11 +27,11 @@ four switches. Every log file *must* have all four.
 
 
 The newest out of the set of files matching <glob> is inspected. If it is found
-to be older than <max-age> then it is presumed that the process has not run and
-so this returns critical.
+to be older than <max-age> then it is presumed that the process that writes the
+log has (improperly) not run and so this returns critical.
 If it is newer than <max-age>, the file is opened and read to the last line. If
-the last line matches <pattern> then this is deemed a success and this returns
-OK. If it does not matchm, this returns critical.
+the last line matches <pattern> then this is deemed a success and this check is
+OK. If it does not match, it is critical.
 
 For example, to check the daily, weekly and monthly MySQL backups in one go:
 
