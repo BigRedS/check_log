@@ -1,0 +1,175 @@
+#! /usr/bin/perl
+
+use strict;
+
+use Getopt::Long;
+
+my @globs;
+my @patterns;
+my @names;
+my @max_ages;
+
+my $help = undef;
+
+GetOptions(
+	"glob|g=s" => \@globs,
+	"pattern|p=s" => \@patterns,
+	"name|n=s" => \@names,
+	"max-age|a=s" => \@max_ages,
+	"help|h" => \$help,
+) or die ("Failed to parse command-line arguments");
+
+usage() if $help;
+
+unless((     scalar(@names) == scalar(@patterns)) 
+        and (scalar(@names) == scalar(@globs)) 
+	and (scalar(@names) == scalar(@max_ages))
+	){
+	abort("Unbalanced arguments");
+}
+my @good;
+my @bad;
+for (my $i = 0; $i <= @names; $i++){
+
+	my $name = $names[$i];
+	next if $name eq '';
+
+	my $glob = $globs[$i];
+	my $pattern = qr/$patterns[$i]/;
+	my $max_age = max_age($max_ages[$i]);
+
+	debug("Name: $name");
+	debug("Glob: $glob");
+	debug("Pattern: $pattern");
+	debug("Max age: $max_age");
+
+
+
+#$pattern = qr/$pattern/;
+
+	my @logfiles = glob($glob);
+
+	my %ages;
+	foreach my $filename (@logfiles){
+		my $mtime = (stat($filename))[10];
+		$ages{$mtime} = $filename;
+	}
+	my $newest_mtime = (reverse(sort(keys(%ages))))[0];
+
+	my $file = %ages{$newest_mtime};
+
+	debug("Newest file: '$file' : ".localtime($newest_mtime)." ($newest_mtime)");
+
+	if($newest_mtime < $max_age){
+		push(@bad, [$name, "File $file too old"]);
+		next;
+	}
+	debug("File new enough");
+
+
+	open(my $fh, "<", $file) or die ("Failed to open file '$file' :$!");
+	my $lastline;
+	while(my $line = readline($fh)){
+		$lastline = $line if $line =~ m/\S+/;
+	}
+	chomp($lastline);
+
+	debug("Last line: $lastline");
+	if($lastline =~ $pattern){
+		push(@good, $name);
+		debug("log OK");
+		next;
+	}
+	debug("Log failed");
+	push(@bad, [$name, "'$pattern' not found in $file'"]);
+}
+
+
+if(@good){
+	print "OK: ".scalar(@good)." logfiles are fine\n";
+	exit 0;
+}
+
+print "CRITICAL ".scalar(@bad)." logfiles failed | ";
+foreach my $problem (@bad){
+	print "$problem->[0]: $problem->[1]\n";
+}
+exit 2;
+
+
+sub max_age{
+	my $age = shift;
+	return $age if $age =~ m/^\d+$/;
+	die ("Invalid age: '$age'") unless $age =~ m/(\d+)(\w)/;
+	my ($number,$letter) = ($1,$2);
+	lc($letter);
+	return $number * 60 if $letter eq 'm';
+	return $number * 3600 if $letter eq 'h';
+	return $number * 86400 if $letter eq 'd';
+	return $number * 604800 if $letter eq 'w'
+
+}
+
+sub debug{
+	return unless $ENV{DEBUG};
+	my $message = shift;
+	chomp($message);
+	print "DEBUG: $message\n";
+}
+
+sub abort{
+	my $message = shift;
+	chomp($message);
+	print "ERROR: $message\n";
+	exit 4;
+}
+
+
+sub usage{
+
+	print <<'EOF';
+
+check_logfile - NRPE check for arbitrary logfiles.
+
+Usage:
+
+  check_logfile --name <name> --pattern <pattern> --glob <glob> --max-age <time>
+
+Several log files may be watched at a time, by specifying several sets of those
+four switches. Every log file *must* have all four. 
+
+  --name <name>, -n <name>
+
+    The name to use in the NRPE output, probably a single short word.
+
+  --glob <glob>, -g <glob>
+
+    A glob to use to list the possible log files. 
+
+  --max-age [<integer> | <integer>h | <integer>d | <integer> w]
+  --a [<integer> | <integer>h | <integer>d | <integer> w]
+
+    Maximum age for the log file, in seconds, hours, days or weeks, respectively
+
+  --pattern <perl regex>, -p <perl regex>
+
+    Perl regex to case-sensitively check for.
+
+
+The newest out of the set of files matching <glob> is inspected. If it is found
+to be older than <max-age> then it is presumed that the process has not run and
+so this returns critical.
+If it is newer than <max-age>, the file is opened and read to the last line. If
+the last line matches <pattern> then this is deemed a success and this returns
+OK. If it does not matchm, this returns critical.
+
+For example, to check the daily, weekly and monthly MySQL backups in one go:
+
+log-monitor --name daily --pattern "ERRORSUM: 0000" --glob "/var/log/mysql_backup/*daily" --max-age 1\
+            -n weekly  -p "ERRORSUM:\s+0000" -g "/var/log/mysql_backup/*weekly" -a 1w
+            -n monthly -p "ERRORSUM:\s+0000" -g "/var/log/mysql_backup/*monthly" -a 1m
+
+
+EOF
+exit 4;
+}
