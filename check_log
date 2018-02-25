@@ -19,7 +19,7 @@ GetOptions(
 	"help|h" => \$help,
 ) or abort ("Failed to parse command-line arguments");
 
-usage() if $help;
+usage() if $help or !@names;
 
 unless((     scalar(@names) == scalar(@patterns)) 
         and (scalar(@names) == scalar(@globs)) 
