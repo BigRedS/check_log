@@ -1,5 +1,14 @@
 #! /usr/bin/perl
 
+# check_log
+#
+# NRPE check for mysql-backup scripts and friends. 
+#
+# Avi 2018-02
+
+# This program is free software; you may redistribute it and/or modify it under
+# the same terms as Perl itself.
+
 use strict;
 
 use Getopt::Long;
@@ -172,7 +181,7 @@ Exits:
 2:  One or more log files is critical
 4:  Program error; invocation or run-time
 
-Set 'DEBUG' environment variable to '1' to get more useful input to STDERR.
+Set 'DEBUG' environment variable to '1' to get more useful output to STDERR.
 
 EOF
 exit 4;
