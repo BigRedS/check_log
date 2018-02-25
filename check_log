@@ -83,9 +83,8 @@ for (my $i = 0; $i <= @names; $i++){
 	push(@bad, [$name, "'$pattern' not found in $file'"]);
 }
 
-
-if(@good){
-	print "OK: ".scalar(@good)." logfiles are fine\n";
+if(scalar(@good) == scalar(@names)){
+	print "OK: ".scalar(@good)." logfiles (".join(" ", @good).") are fine\n";
 	exit 0;
 }
 
