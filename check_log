@@ -58,7 +58,7 @@ for (my $i = 0; $i <= @names; $i++){
 
 	debug("Newest file: '$file' : ".localtime($newest_mtime)." ($newest_mtime)");
 
-	my $age = $now = $newest_mtime;
+	my $age = $now - $newest_mtime;
 	if($age > $max_age){
 		push(@bad, [$name, "File $file too old"]);
 		next;
