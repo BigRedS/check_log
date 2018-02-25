@@ -1,4 +1,4 @@
-#check_log
+# check_log
 
 NRPE monitor for logfiles.
 
@@ -24,8 +24,8 @@ string "Exited OK", exiting critical if that doesn't exist and OK if it does.
 
 ## Exit statuses
 
-0: All log files have been checked as OK
-2: One or more log files are not OK
-4: Error either in invocation or run-time
+* `0`: All log files have been checked as OK
+* `2`: One or more log files are not OK
+* `4`: Error either in invocation or run-time
 
 Set the `DEBUG` environment variable to `1` to get more useful output to STDERR.
