@@ -12,7 +12,7 @@ The logfile itself is selected by passing a filename-expansion patter (a glob), 
 which the youngest-matching file is selected. For a real-life example, here's how I 
 keep tabs on my backups:
 
-    log-monitor --name weekly --pattern "Exited OK" --glob "/var/log/mysql-xtrabackup/*weekly" --max-age 1w
+    log-monitor --name weekly --pattern "Exited OK" --glob "/var/log/mysql-xtrabackup/*weekly" --max-age 1w \
                 -n monthly -p "Exited OK" -g "/var/log/mysql-xtrabackup/*monthly" -a 1m
 
 That is, one NRPE check keeps tabs on both those files. For the 'weekly' one it expands
