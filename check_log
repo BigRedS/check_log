@@ -28,13 +28,17 @@ GetOptions(
 	"help|h" => \$help,
 ) or abort ("Failed to parse command-line arguments");
 
+if($ARGV[1]){
+	abort("Extraneous command-line arguments; are all your globs properly quoted?");
+}
+
 usage() if $help or !@names;
 
 unless((     scalar(@names) == scalar(@patterns)) 
         and (scalar(@names) == scalar(@globs)) 
 	and (scalar(@names) == scalar(@max_ages))
 	){
-	abort("Unbalanced arguments");
+	abort("Unbalanced arguments; --name, --pattern, --glob and --max-age must be specified for each log file");
 }
 
 my $now = time();
