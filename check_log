@@ -43,6 +43,7 @@ unless((     scalar(@names) == scalar(@patterns))
 
 my $now = time();
 my @good;
+my @warn;
 my @bad;
 for (my $i = 0; $i <= @names; $i++){
 
@@ -59,6 +60,14 @@ for (my $i = 0; $i <= @names; $i++){
 	debug("Max age: $max_age");
 
 	my @logfiles = glob($glob);
+	if(scalar(@logfiles) == 0){
+		push(@warn, [$name, "Glob '$glob' didn't match any files"]);
+		next;
+	}
+	if(scalar(@logfiles) == 1){
+		push(@warn, [$name, "Glob '$glob' only matched one file"]);
+	}
+
 
 	my %ages;
 	foreach my $filename (@logfiles){
@@ -96,11 +105,16 @@ for (my $i = 0; $i <= @names; $i++){
 	push(@bad, [$name, "'$pattern' not found in $file'"]);
 }
 
-if(scalar(@good) == scalar(@names)){
+if($warn[0] and !$bad[0]){
+	print "WARNING: ".scalar(@warn)." warnings | ";
+	foreach my $warning (@warn){
+		print "$warning->[0]: $warning->[1]\n";
+	}
+	exit 1;
+}elsif(scalar(@good) == scalar(@names)){
 	print "OK: ".scalar(@good)." logfiles (".join(" ", @good).") are fine\n";
 	exit 0;
 }
-
 print "CRITICAL ".scalar(@bad)." logfiles failed | ";
 foreach my $problem (@bad){
 	print "$problem->[0]: $problem->[1]\n";
